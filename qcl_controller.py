@@ -23,9 +23,9 @@ class QCL(object):
         self.ser = serial.Serial(port)      # opens the COM1 port to communicate with the laser
         self.ser.baudrate = 115200       # set the baudrate to 115200 to use the right speed to send data over
         self.ser.timeout = 1             # set timeout for port to 1 second
-        self.get_all()
         self.log = log
         self.log_file = []
+        self.get_all()
 
     def _log_write(self, string):
         if self.log is True:
@@ -49,7 +49,7 @@ class QCL(object):
         command = ":laser:set {}\n".format(str(value))
         self._log_write(command)
         self.ser.write(command)
-        rlvalue = get_wn()
+        rlvalue = self.get_wn()
         return rlvalue
 
     def get_freq(self):
@@ -68,7 +68,7 @@ class QCL(object):
         command = ":pulse:freq {}\n".format(value)
         self._log_write(command)
         self.ser.write(command)
-        rlvalue = get_freq()
+        rlvalue = self.get_freq()
         return rlvalue
 
     def get_pw(self):
@@ -87,7 +87,7 @@ class QCL(object):
         command = ":pulse:width {}\n".format(value)
         self._log_write(command)
         self.ser.write(command)
-        rlvalue = get_pw
+        rlvalue = self.get_pw()
         return rlvalue
 
     def get_startwn(self):
@@ -106,7 +106,7 @@ class QCL(object):
         command = ":scan:stop {}\n".format(value)
         self._log_write(command)
         self.ser.write(command)
-        rlvalue = get_startwn
+        rlvalue = self.get_startwn()
         return rlvalue
 
     def get_stopwn(self):
@@ -125,7 +125,7 @@ class QCL(object):
         command = ":scan:stop {}\n".format(value)
         self._log_write(command)
         self.ser.write(command)
-        rlvalue = get_stopwn()
+        rlvalue = self.get_stopwn()
         return rlvalue
 
     def get_rate(self):
@@ -144,7 +144,7 @@ class QCL(object):
         command = ":scan:rate {}\n".format(value)
         self._log_write(command)
         self.ser.write(command)
-        rlvalue = get_rate()
+        rlvalue = self.get_rate()
         return rlvalue
 
     def get_scans(self):
@@ -163,7 +163,7 @@ class QCL(object):
         command = ":scan:cycles {}\n".format(value)
         self._log_write(command)
         self.ser.write(command)
-        rlvalue = set_rate()
+        rlvalue = self.get_scans()
         return rlvalue
 
     def get_whours(self):

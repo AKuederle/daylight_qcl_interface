@@ -1,2 +1,4 @@
 1 [x] the set command don't work (wrong call for answer)
-2 [x] the set all command don't work (forgot brackets after function)
+2 [x] the get all command don't work (forgot brackets after function)
+3 [x] __init__ problem (order of the calls)
+4 [] get_whours does not work (empty callback)
