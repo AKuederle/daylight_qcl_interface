@@ -3,4 +3,5 @@
 3 [x] __init__ problem (order of the calls)
 4 [x] get_whours does not work (empty callback) EDIT: and get_scancount.
 5 [x] callback raise does not work
-6 [] need a QCL.close() function which closes the connection
+6 [x] need a QCL.close() function which closes the connection
+7 [x] implement the step scan commands
