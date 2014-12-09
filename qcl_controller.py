@@ -168,16 +168,18 @@ class QCL(object):
 
     def get_whours(self):
         """get the working hours"""
-        command = ":info:hhrs?"
+        command = ":info:hhrs?\n"
         self._log_write(command)
+        self.ser.write(command)
         answer = self.ser.read(11)
         self._log_write(answer)
         return answer[:-5]
 
     def get_scancount(self):
         """get the number of scans during a measurment"""
-        command = ":scan:count?"
+        command = ":scan:count?\n"
         self._log_write(command)
+        self.ser.write(command)
         answer = self.ser.read(6)
         self._log_write(answer)
         return answer[:-2]
