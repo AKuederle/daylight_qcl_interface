@@ -1,2 +1,2 @@
-1 [] the set command don't work (wrong call for answer)
-2 [] the set all command don't work (forgot brackets after function)
+1 [x] the set command don't work (wrong call for answer)
+2 [x] the set all command don't work (forgot brackets after function)

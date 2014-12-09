@@ -48,7 +48,8 @@ class QCL(object):
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":laser:set {}\n".format(str(value))
         self._log_write(command)
-        rlvalue = self.ser.write(command)
+        self.ser.write(command)
+        rlvalue = get_wn()
         return rlvalue
 
     def get_freq(self):
@@ -66,7 +67,8 @@ class QCL(object):
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":pulse:freq {}\n".format(value)
         self._log_write(command)
-        rlvalue = self.ser.write(command)
+        self.ser.write(command)
+        rlvalue = get_freq()
         return rlvalue
 
     def get_pw(self):
@@ -84,7 +86,8 @@ class QCL(object):
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":pulse:width {}\n".format(value)
         self._log_write(command)
-        rlvalue = self.ser.write(command)
+        self.ser.write(command)
+        rlvalue = get_pw
         return rlvalue
 
     def get_startwn(self):
@@ -102,7 +105,8 @@ class QCL(object):
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:stop {}\n".format(value)
         self._log_write(command)
-        rlvalue = self.ser.write(command)
+        self.ser.write(command)
+        rlvalue = get_startwn
         return rlvalue
 
     def get_stopwn(self):
@@ -120,7 +124,8 @@ class QCL(object):
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:stop {}\n".format(value)
         self._log_write(command)
-        rlvalue = self.ser.write(command)
+        self.ser.write(command)
+        rlvalue = get_stopwn()
         return rlvalue
 
     def get_rate(self):
@@ -138,7 +143,8 @@ class QCL(object):
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:rate {}\n".format(value)
         self._log_write(command)
-        rlvalue = self.ser.write(command)
+        self.ser.write(command)
+        rlvalue = get_rate()
         return rlvalue
 
     def get_scans(self):
@@ -156,7 +162,8 @@ class QCL(object):
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:cycles {}\n".format(value)
         self._log_write(command)
-        rlvalue = self.ser.write(command)
+        self.ser.write(command)
+        rlvalue = set_rate()
         return rlvalue
 
     def get_whours(self):
@@ -189,11 +196,11 @@ class QCL(object):
 
     def get_all(self):
         all_stats = []
-        all_stats.append(self.get_wn)
-        all_stats.append(self.get_freq)
-        all_stats.append(self.get_pw)
-        all_stats.append(self.get_startwn)
-        all_stats.append(self.get_stopwn)
-        all_stats.append(self.get_rate)
-        all_stats.append(self.get_scans)
+        all_stats.append(self.get_wn())
+        all_stats.append(self.get_freq())
+        all_stats.append(self.get_pw())
+        all_stats.append(self.get_startwn())
+        all_stats.append(self.get_stopwn())
+        all_stats.append(self.get_rate())
+        all_stats.append(self.get_scans())
         return all_stats
