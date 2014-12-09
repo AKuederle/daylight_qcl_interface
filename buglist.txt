@@ -2,3 +2,4 @@
 2 [x] the get all command don't work (forgot brackets after function)
 3 [x] __init__ problem (order of the calls)
 4 [] get_whours does not work (empty callback)
+5 [x] callback raise does not work
