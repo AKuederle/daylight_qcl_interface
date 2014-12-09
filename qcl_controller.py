@@ -44,7 +44,7 @@ class QCL(object):
 
     def set_wn(self, value):
         """set wavenumber"""
-        if float(value) < self._wn_range[0] and float(value) > self._wn_range[1]:
+        if float(value) < self._wn_range[0] or float(value) > self._wn_range[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":laser:set {}\n".format(str(value))
         self._log_write(command)
@@ -63,7 +63,7 @@ class QCL(object):
 
     def set_freq(self, value):
         """set frequency"""
-        if float(value) < self._freq_range[0] and float(value) > self._freq_range[1]:
+        if float(value) < self._freq_range[0] or float(value) > self._freq_range[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":pulse:freq {}\n".format(value)
         self._log_write(command)
@@ -82,7 +82,7 @@ class QCL(object):
 
     def set_pw(self, value):
         """set pulsewidth"""
-        if float(value) < self._pw_range[0] and float(value) > self._pw_range[1]:
+        if float(value) < self._pw_range[0] or float(value) > self._pw_range[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":pulse:width {}\n".format(value)
         self._log_write(command)
@@ -101,7 +101,7 @@ class QCL(object):
 
     def set_startwn(self, value):
         """set start wavenumber"""
-        if float(value) < self._stopwn_range[0] and float(value) > self._stopwn_range[1]:
+        if float(value) < self._stopwn_range[0] or float(value) > self._stopwn_range[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:stop {}\n".format(value)
         self._log_write(command)
@@ -120,7 +120,7 @@ class QCL(object):
 
     def set_stopwn(self, value):
         """set stop wavenumber"""
-        if float(value) < self._stopwn_range[0] and float(value) > self._stopwn_range[1]:
+        if float(value) < self._stopwn_range[0] or float(value) > self._stopwn_range[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:stop {}\n".format(value)
         self._log_write(command)
@@ -139,7 +139,7 @@ class QCL(object):
 
     def set_rate(self, value):
         """set scanrate"""
-        if float(value) < self._rate_range[0] and float(value) > self._rate_range[1]:
+        if float(value) < self._rate_range[0] or float(value) > self._rate_range[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:rate {}\n".format(value)
         self._log_write(command)
@@ -158,7 +158,7 @@ class QCL(object):
 
     def set_scans(self, value):
         """set number of scans"""
-        if float(value) < self._scan_range[0] and float(value) > self._scan_range[1]:
+        if float(value) < self._scan_range[0] or float(value) > self._scan_range[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:cycles {}\n".format(value)
         self._log_write(command)
