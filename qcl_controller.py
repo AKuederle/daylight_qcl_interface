@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 
 class RangeError(Exception):
     def __init__(self, value):
@@ -8,14 +10,18 @@ class RangeError(Exception):
 
 
 class QCL(object):
-    """docstring for QCL"""
+    """Simple python wrapper for a selection of serial port commands to control a daylight solution tunable QCL.
+
+
+
+    """
     _wn_range      = (980.04, 1244.99)
     _freq_range    = (1.0, 100.0)
     _pw_range      = (0.04, 0.5)
     _startwn_range = (980.04, 1244.99)
     _stopwn_range  = (980.04, 1244.99)
     _rate_range    = (1.0, 6.0)
-    _scan_range    = (1.0, 10000.0)
+    _cycles_range    = (1.0, 10000.0)
     _mode_range    = (1.0, 4.0)
     _pause_range   = (0.0, 10.0)
     _step_range    = (0.01, 264.95)
@@ -159,7 +165,7 @@ class QCL(object):
         self._log_write(answer)
         return answer[:-2]
 
-    def set_scans(self, value):
+    def set_cycles(self, value):
         """set number of scans"""
         if float(value) < self._scan_range[0] or float(value) > self._scan_range[1]:
             raise RangeError("{} is out of range!".format(str(value)))

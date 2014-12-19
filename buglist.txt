@@ -5,3 +5,5 @@
 5 [x] callback raise does not work
 6 [x] need a QCL.close() function which closes the connection
 7 [x] implement the step scan commands
+8 [] change the all_stat to adictionary for easier accses
+9 [] maybe add funtions or variabels for direkt accses to individual stats
