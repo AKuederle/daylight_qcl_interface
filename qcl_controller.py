@@ -15,16 +15,9 @@ class QCL(object):
 
 
     """
-    _wn_range      = (980.04, 1244.99)
-    _freq_range    = (1.0, 100.0)
-    _pw_range      = (0.04, 0.5)
-    _startwn_range = (980.04, 1244.99)
-    _stopwn_range  = (980.04, 1244.99)
-    _rate_range    = (1.0, 6.0)
-    _cycles_range    = (1.0, 10000.0)
-    _mode_range    = (1.0, 4.0)
-    _pause_range   = (0.0, 10.0)
-    _step_range    = (0.01, 264.95)
+    from collections import namedtuple
+    _control = namedtuple("control", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step"])
+    Range = _control(wn=(980.04, 1244.99), freq=(1.0, 100.0), pw=(0.04, 0.5), startwn=(980.04, 1244.99), stopwn=(980.04, 1244.99), rate=(1.0, 6.0), cycles=(1.0, 10000.0), mode=(1.0, 4.0), pause=(0.0, 10.0), step=(0.01, 264.95))
 
     def __init__(self, port=0, log=False):
         import serial
@@ -35,6 +28,7 @@ class QCL(object):
         self.log = log
         self.log_file = []
         self.get_all()
+        Set = self._control(wn=self.set_wn, freq=self.set_freq, pw=self.set_pw, startwn=self.set_startwn, stopwn=self.set_stopwn, rate=self.set_rate, cycles=self.set_cycles, mode=self.set_mode, pause=self.set_pause, step=self.set_step)
 
     def _log_write(self, string):
         if self.log is True:
