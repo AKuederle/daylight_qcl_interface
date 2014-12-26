@@ -52,7 +52,7 @@ class QCL(object):
         answer = self.ser.read(13)
         self._log_write(answer)
         rlvalue = answer[:-6]
-        self.Stat.wn = rlvalue
+        self.Stat = self.Stat._replace(wn=rlvalue)
         return rlvalue
 
     def set_wn(self, value):
@@ -73,7 +73,7 @@ class QCL(object):
         answer = self.ser.read(10)
         self._log_write(answer)
         rlvalue = answer[:-5]
-        self.Stat.freq = rlvalue
+        self.Stat = self.Stat._replace(freq=rlvalue)
         return rlvalue
 
     def set_freq(self, value):
@@ -94,7 +94,7 @@ class QCL(object):
         answer = self.ser.read(10)
         self._log_write(answer)
         rlvalue = answer[:-6]
-        self.Stat.pw = rlvalue
+        self.Stat = self.Stat._replace(pw=rlvalue)
         return rlvalue
 
     def set_pw(self, value):
@@ -115,7 +115,7 @@ class QCL(object):
         answer = self.ser.read(13)
         self._log_write(answer)
         rlvalue = answer[:-6]
-        self.Stat.startwn = rlvalue
+        self.Stat = self.Stat._replace(startwn=rlvalue)
         return rlvalue
 
     def set_startwn(self, value):
@@ -136,7 +136,7 @@ class QCL(object):
         answer = self.ser.read(13)
         self._log_write(answer)
         rlvalue = answer[:-6]
-        self.Stat.stopwn = rlvalue
+        self.Stat = self.Stat._replace(stopwn=rlvalue)
         return rlvalue
 
     def set_stopwn(self, value):
@@ -157,7 +157,7 @@ class QCL(object):
         answer = self.ser.read(3)
         self._log_write(answer)
         rlvalue = answer[:-2]
-        self.Stat.rate = rlvalue
+        self.Stat = self.Stat._replace(rate=rlvalue)
         return rlvalue
 
     def set_rate(self, value):
@@ -178,7 +178,7 @@ class QCL(object):
         answer = self.ser.read(20)
         self._log_write(answer)
         rlvalue = answer[:-2]
-        self.Stat.scans = rlvalue
+        self.Stat = self.Stat._replace(scans=rlvalue)
         return rlvalue
 
     def set_cycles(self, value):
@@ -199,7 +199,7 @@ class QCL(object):
         answer = self.ser.read(3)
         self._log_write(answer)
         rlvalue = answer[:-2]
-        self.Stat.mode = rlvalue
+        self.Stat = self.Stat._replace(mode=rlvalue)
         return rlvalue
 
     def set_mode(self, value):
@@ -220,7 +220,7 @@ class QCL(object):
         answer = self.ser.read(3)
         self._log_write(answer)
         rlvalue = answer[:-2]
-        self.Stat.pause = rlvalue
+        self.Stat = self.Stat._replace(pause=rlvalue)
         return rlvalue
 
     def set_pause(self, value):
@@ -241,7 +241,7 @@ class QCL(object):
         answer = self.ser.read(3)
         self._log_write(answer)
         rlvalue = answer[:-2]
-        self.Stat.step = rlvalue
+        self.Stat = self.Stat._replace(step=rlvalue)
         return rlvalue
 
     def set_step(self, value):
@@ -262,7 +262,7 @@ class QCL(object):
         answer = self.ser.read(11)
         self._log_write(answer)
         rlvalue = answer[:-5]
-        self.Stat.whours = rlvalue
+        self.Stat = self.Stat._replace(whours=rlvalue)
         return rlvalue
 
     def get_scancount(self):
@@ -273,7 +273,7 @@ class QCL(object):
         answer = self.ser.read(6)
         self._log_write(answer)
         rlvalue = answer[:-2]
-        self.Stat.scancount = rlvalue
+        self.Stat = self.Stat._replace(scancount=rlvalue)
         return rlvalue
 
     def scan_start(self):
