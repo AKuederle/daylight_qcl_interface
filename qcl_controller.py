@@ -51,7 +51,7 @@ class QCL(object):
         self.ser.write(command)
         answer = self.ser.read(13)
         self._log_write(answer)
-        rlvalue = answer[:-6]
+        rlvalue = float(answer[:-6])
         self.Stat = self.Stat._replace(wn=rlvalue)
         return rlvalue
 
@@ -72,7 +72,7 @@ class QCL(object):
         self.ser.write(command)
         answer = self.ser.read(10)
         self._log_write(answer)
-        rlvalue = answer[:-5]
+        rlvalue = float(answer[:-5])
         self.Stat = self.Stat._replace(freq=rlvalue)
         return rlvalue
 
@@ -93,7 +93,7 @@ class QCL(object):
         self.ser.write(command)
         answer = self.ser.read(10)
         self._log_write(answer)
-        rlvalue = answer[:-6]
+        rlvalue = float(answer[:-6])
         self.Stat = self.Stat._replace(pw=rlvalue)
         return rlvalue
 
@@ -114,7 +114,7 @@ class QCL(object):
         self.ser.write(command)
         answer = self.ser.read(13)
         self._log_write(answer)
-        rlvalue = answer[:-6]
+        rlvalue = float(answer[:-6])
         self.Stat = self.Stat._replace(startwn=rlvalue)
         return rlvalue
 
@@ -135,7 +135,7 @@ class QCL(object):
         self.ser.write(command)
         answer = self.ser.read(13)
         self._log_write(answer)
-        rlvalue = answer[:-6]
+        rlvalue = float(answer[:-6])
         self.Stat = self.Stat._replace(stopwn=rlvalue)
         return rlvalue
 
@@ -156,7 +156,7 @@ class QCL(object):
         self.ser.write(command)
         answer = self.ser.read(3)
         self._log_write(answer)
-        rlvalue = answer[:-2]
+        rlvalue = float(answer[:-2])
         self.Stat = self.Stat._replace(rate=rlvalue)
         return rlvalue
 
@@ -177,7 +177,7 @@ class QCL(object):
         self.ser.write(command)
         answer = self.ser.read(20)
         self._log_write(answer)
-        rlvalue = answer[:-2]
+        rlvalue = float(answer[:-2])
         self.Stat = self.Stat._replace(scans=rlvalue)
         return rlvalue
 
@@ -198,7 +198,7 @@ class QCL(object):
         self.ser.write(command)
         answer = self.ser.read(3)
         self._log_write(answer)
-        rlvalue = answer[:-2]
+        rlvalue = float(answer[:-2])
         self.Stat = self.Stat._replace(mode=rlvalue)
         return rlvalue
 
@@ -219,7 +219,7 @@ class QCL(object):
         self.ser.write(command)
         answer = self.ser.read(3)
         self._log_write(answer)
-        rlvalue = answer[:-2]
+        rlvalue = float(answer[:-2])
         self.Stat = self.Stat._replace(pause=rlvalue)
         return rlvalue
 
@@ -240,7 +240,7 @@ class QCL(object):
         self.ser.write(command)
         answer = self.ser.read(3)
         self._log_write(answer)
-        rlvalue = answer[:-2]
+        rlvalue = float(answer[:-2])
         self.Stat = self.Stat._replace(step=rlvalue)
         return rlvalue
 
@@ -261,7 +261,7 @@ class QCL(object):
         self.ser.write(command)
         answer = self.ser.read(11)
         self._log_write(answer)
-        rlvalue = answer[:-5]
+        rlvalue = float(answer[:-5])
         self.Stat = self.Stat._replace(whours=rlvalue)
         return rlvalue
 
@@ -272,7 +272,7 @@ class QCL(object):
         self.ser.write(command)
         answer = self.ser.read(6)
         self._log_write(answer)
-        rlvalue = answer[:-2]
+        rlvalue = float(answer[:-2])
         self.Stat = self.Stat._replace(scancount=rlvalue)
         return rlvalue
 
@@ -298,6 +298,35 @@ class QCL(object):
         self.get_rate()
         self.get_scans()
         return self.Stat
+
+    def wait_for_finish(self, interval=3, callback_function=None):
+        """Give information, when current scans are finished.
+
+        The function query the current scancount every few seconds (defined by the intervall parameter). If no callback_function is provided, a synchrone sleeptimer is used.
+        Therefore the script will be blocked until the current scans are finished (indicated by a scancount of 0).
+        If a callback_function is provided, a asynchron timer in a different thread is used.
+        Furthermore the given callback_function is called with the current scancount as primary parameter,
+        as a way of retrieving the scancount.
+        Latter must only be used for multithreading applications, such like GUIs, while the synchrone timer is a way to delay the execution of a simple script, until scans have finished
+        """
+        def asynchron_timer(interval=interval, callback_function=callback_function):
+            self.scancount = self.get_scancount()
+            callback_function(self.scancount)
+            if self.scancount != 0:
+                timer = Timer(interval, asynchron_timer)
+                timer.start()
+
+        if callback_function is None:
+            from time import sleep
+            while True:
+                self.scancount = self.get_scancount()
+                if self.scancount == 0:
+                    break
+                sleep(interval)
+
+        else:
+            from threading import Timer
+            asynchron_timer()
 
     def close(self):
         """close the port."""
