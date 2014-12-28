@@ -54,7 +54,7 @@ class QCL(object):
 
     def set_wn(self, value):
         """set wavenumber."""
-        if float(value) < self._wn_range[0] or float(value) > self._wn_range[1]:
+        if float(value) < self._Range.wn[0] or float(value) > self._Range.wn[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":laser:set {}\n".format(str(value))
         self._log_write(command)
@@ -75,7 +75,7 @@ class QCL(object):
 
     def set_freq(self, value):
         """set frequency."""
-        if float(value) < self._freq_range[0] or float(value) > self._freq_range[1]:
+        if float(value) < self._Range.freq[0] or float(value) > self._Range.freq[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":pulse:freq {}\n".format(value)
         self._log_write(command)
@@ -96,7 +96,7 @@ class QCL(object):
 
     def set_pw(self, value):
         """set pulsewidth."""
-        if float(value) < self._pw_range[0] or float(value) > self._pw_range[1]:
+        if float(value) < self._Range.pw[0] or float(value) > self._Range.pw[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":pulse:width {}\n".format(value)
         self._log_write(command)
@@ -117,7 +117,7 @@ class QCL(object):
 
     def set_startwn(self, value):
         """set start wavenumber."""
-        if float(value) < self._stopwn_range[0] or float(value) > self._stopwn_range[1]:
+        if float(value) < self._Range.startwn[0] or float(value) > self._Range.startwn[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:stop {}\n".format(value)
         self._log_write(command)
@@ -138,7 +138,7 @@ class QCL(object):
 
     def set_stopwn(self, value):
         """set stop wavenumber."""
-        if float(value) < self._stopwn_range[0] or float(value) > self._stopwn_range[1]:
+        if float(value) < self._Range.stopwn[0] or float(value) > self._Range.stopwn[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:stop {}\n".format(value)
         self._log_write(command)
@@ -159,7 +159,7 @@ class QCL(object):
 
     def set_rate(self, value):
         """set scanrate."""
-        if float(value) < self._rate_range[0] or float(value) > self._rate_range[1]:
+        if float(value) < self._Range.rate[0] or float(value) > self._Range.rate[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:rate {}\n".format(value)
         self._log_write(command)
@@ -180,7 +180,7 @@ class QCL(object):
 
     def set_cycles(self, value):
         """set number of scans."""
-        if float(value) < self._scan_range[0] or float(value) > self._scan_range[1]:
+        if float(value) < self._Range.cycles[0] or float(value) > self._Range.cycles[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:cycles {}\n".format(value)
         self._log_write(command)
@@ -201,9 +201,9 @@ class QCL(object):
 
     def set_mode(self, value):
         """set wavenumber."""
-        if float(value) < self._mode_range[0] or float(value) > self._mode_range[1]:
+        if float(value) < self._Range.mode[0] or float(value) > self._Range.mode[1]:
             raise RangeError("{} is out of range!".format(str(value)))
-        command = ":scan:mode {}\n".format(str(value))
+        command = ":scan:mode {}\n".format(str(int(value)))
         self._log_write(command)
         self.ser.write(command)
         rlvalue = self.get_mode()
@@ -222,7 +222,7 @@ class QCL(object):
 
     def set_pause(self, value):
         """set wavenumber."""
-        if float(value) < self._pause_range[0] or float(value) > self._pause_range[1]:
+        if float(value) < self._Range.pause[0] or float(value) > self._Range.pause[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:pause {}\n".format(str(value))
         self._log_write(command)
@@ -243,7 +243,7 @@ class QCL(object):
 
     def set_step(self, value):
         """set wavenumber."""
-        if float(value) < self._step_range[0] or float(value) > self._step_range[1]:
+        if float(value) < self._Range.step[0] or float(value) > self._Range.step[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:step {}\n".format(str(value))
         self._log_write(command)
