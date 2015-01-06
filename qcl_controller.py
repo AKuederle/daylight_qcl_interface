@@ -11,7 +11,6 @@ class RangeError(Exception):
 
 
 class QCL(object):
-
     """Simple python wrapper for a selection of serial port commands to control a daylight solution tunable QCL.
     """
 
@@ -32,7 +31,7 @@ class QCL(object):
         self.Set = self._control(wn=self.set_wn, freq=self.set_freq, pw=self.set_pw, startwn=self.set_startwn, stopwn=self.set_stopwn, rate=self.set_rate, cycles=self.set_cycles, mode=self.set_mode, pause=self.set_pause, step=self.set_step)
         self.Get = self._query(wn=self.get_wn, freq=self.get_freq, pw=self.get_pw, startwn=self.get_startwn, stopwn=self.get_stopwn, rate=self.get_rate, cycles=self.get_cycles,
                                mode=self.get_mode, pause=self.get_pause, step=self.get_step, whours=self.get_whours, scancount=self.get_scancount, all=self.get_all)
-        self.Stat = self._state(wn=0, freq=0, pw=0, startwn=0, stopwn=0, rate=0, cycles=0, mode=0, pause=0, step=0, whours=0)
+        self.Stat = self._state(wn=None, freq=None, pw=None, startwn=None, stopwn=None, rate=None, cycles=None, mode=None, pause=None, step=None, whours=None)
         self.get_all()
 
     def _log_write(self, string):
@@ -119,7 +118,7 @@ class QCL(object):
         """set start wavenumber."""
         if float(value) < self._Range.startwn[0] or float(value) > self._Range.startwn[1]:
             raise RangeError("{} is out of range!".format(str(value)))
-        command = ":scan:stop {}\n".format(value)
+        command = ":scan:start {}\n".format(value)
         self._log_write(command)
         self.ser.write(command)
         rlvalue = self.get_startwn()
@@ -175,7 +174,7 @@ class QCL(object):
         answer = self.ser.read(20)
         self._log_write(answer)
         rlvalue = float(answer[:-2])
-        self.Stat = self.Stat._replace(scans=rlvalue)
+        self.Stat = self.Stat._replace(cycles=rlvalue)
         return rlvalue
 
     def set_cycles(self, value):
@@ -185,7 +184,7 @@ class QCL(object):
         command = ":scan:cycles {}\n".format(value)
         self._log_write(command)
         self.ser.write(command)
-        rlvalue = self.get_scans()
+        rlvalue = self.get_cycles()
         return rlvalue
 
     def get_mode(self):
@@ -211,12 +210,12 @@ class QCL(object):
 
     def get_pause(self):
         """get the current wavenumber."""
-        command = ":scan:mode?\n"
+        command = ":scan:pause?\n"
         self._log_write(command)
         self.ser.write(command)
-        answer = self.ser.read(3)
+        answer = self.ser.read(9)
         self._log_write(answer)
-        rlvalue = float(answer[:-2])
+        rlvalue = float(answer[:-5])
         self.Stat = self.Stat._replace(pause=rlvalue)
         return rlvalue
 
@@ -232,24 +231,30 @@ class QCL(object):
 
     def get_step(self):
         """get the current wavenumber."""
-        command = ":scan:step\n"
-        self._log_write(command)
-        self.ser.write(command)
-        answer = self.ser.read(3)
-        self._log_write(answer)
-        rlvalue = float(answer[:-2])
-        self.Stat = self.Stat._replace(step=rlvalue)
-        return rlvalue
+        if self.Stat.mode != 1:
+            pass
+        else:
+            command = ":scan:step?\n"
+            self._log_write(command)
+            self.ser.write(command)
+            answer = self.ser.read(9)
+            self._log_write(answer)
+            rlvalue = float(answer[:-5])
+            self.Stat = self.Stat._replace(step=rlvalue)
+            return rlvalue
 
     def set_step(self, value):
-        """set wavenumber."""
-        if float(value) < self._Range.step[0] or float(value) > self._Range.step[1]:
-            raise RangeError("{} is out of range!".format(str(value)))
-        command = ":scan:step {}\n".format(str(value))
-        self._log_write(command)
-        self.ser.write(command)
-        rlvalue = self.get_step()
-        return rlvalue
+        """set stepsize."""
+        if self.Stat.mode != 1:
+            pass
+        else:
+            if float(value) < self._Range.step[0] or float(value) > self._Range.step[1]:
+                raise RangeError("{} is out of range!".format(str(value)))
+            command = ":scan:step {}\n".format(str(value))
+            self._log_write(command)
+            self.ser.write(command)
+            rlvalue = self.get_step()
+            return rlvalue
 
     def get_whours(self):
         """get the working hours."""
@@ -269,8 +274,7 @@ class QCL(object):
         self.ser.write(command)
         answer = self.ser.read(6)
         self._log_write(answer)
-        rlvalue = float(answer[:-2])
-        self.Stat = self.Stat._replace(scancount=rlvalue)
+        rlvalue = int(answer[:-2])
         return rlvalue
 
     def scan_start(self):
@@ -287,16 +291,13 @@ class QCL(object):
 
     def get_all(self):
         """get the full current laser state."""
-        self.get_wn()
-        self.get_freq()
-        self.get_pw()
-        self.get_startwn()
-        self.get_stopwn()
-        self.get_rate()
-        self.get_scans()
+        for command in self.Get[:-1]:
+            print command
+            command()
         return self.Stat
 
-    def wait_for_finish(self, interval=3, callback_function=None):
+    def wait_for_finish(self, interval=3.0, callback_function=None):
+        print "fired"
         """Give information, when current scans are finished.
 
         The function query the current scancount every few seconds (defined by the intervall parameter). If no callback_function is provided, a synchrone sleeptimer is used.
@@ -312,6 +313,9 @@ class QCL(object):
             if self.scancount != 0:
                 timer = Timer(interval, asynchron_timer)
                 timer.start()
+            else:
+                pass
+
 
         if callback_function is None:
             from time import sleep

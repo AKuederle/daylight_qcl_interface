@@ -7,5 +7,5 @@
 7 [x] implement the step scan commands
 8 [x] change the all_stat to adictionary for easier accses
 9 [x] maybe add funtions or variabels for direkt accses to individual stats
-10 [] add a check for finish version, Which returns the current scancount an a value when scan is finished.
+10 [x] add a check for finish version, Which returns the current scancount an a value when scan is finished.
 11 [x] change the asingment of new laserstates. Use of _replace funtion is neccasary
