@@ -16,7 +16,7 @@ class QCL(object):
 
     from collections import namedtuple
     _control = namedtuple("control", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step"])
-    _state = namedtuple("state", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step", "whours"])
+    _state = namedtuple("state", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step", "whours", "scancoun"])
     _query = namedtuple("query", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step", "whours", "scancount", "all"])
 
     def __init__(self, port=0, log=False):
@@ -31,7 +31,7 @@ class QCL(object):
         self.Set = self._control(wn=self.set_wn, freq=self.set_freq, pw=self.set_pw, startwn=self.set_startwn, stopwn=self.set_stopwn, rate=self.set_rate, cycles=self.set_cycles, mode=self.set_mode, pause=self.set_pause, step=self.set_step)
         self.Get = self._query(wn=self.get_wn, freq=self.get_freq, pw=self.get_pw, startwn=self.get_startwn, stopwn=self.get_stopwn, rate=self.get_rate, cycles=self.get_cycles,
                                mode=self.get_mode, pause=self.get_pause, step=self.get_step, whours=self.get_whours, scancount=self.get_scancount, all=self.get_all)
-        self.Stat = self._state(wn=None, freq=None, pw=None, startwn=None, stopwn=None, rate=None, cycles=None, mode=None, pause=None, step=None, whours=None)
+        self.Stat = self._state(wn=None, freq=None, pw=None, startwn=None, stopwn=None, rate=None, cycles=None, mode=None, pause=None, step=None, whours=None, scancount=None)
         self.get_all()
 
     def _log_write(self, string):
@@ -275,6 +275,7 @@ class QCL(object):
         answer = self.ser.read(6)
         self._log_write(answer)
         rlvalue = int(answer[:-2])
+        self.Stat = self.Stat._replace(scancount=rlvalue)
         return rlvalue
 
     def scan_start(self):
@@ -292,12 +293,10 @@ class QCL(object):
     def get_all(self):
         """get the full current laser state."""
         for command in self.Get[:-1]:
-            print command
             command()
         return self.Stat
 
-    def wait_for_finish(self, interval=3.0, callback_function=None):
-        print "fired"
+    def wait_for_finish(self, interval=3.0, asynchron=False):
         """Give information, when current scans are finished.
 
         The function query the current scancount every few seconds (defined by the intervall parameter). If no callback_function is provided, a synchrone sleeptimer is used.
@@ -307,17 +306,15 @@ class QCL(object):
         as a way of retrieving the scancount.
         Latter must only be used for multithreading applications, such like GUIs, while the synchrone timer is a way to delay the execution of a simple script, until scans have finished
         """
-        def asynchron_timer(interval=interval, callback_function=callback_function):
+        def asynchron_timer(interval=interval):
             self.scancount = self.get_scancount()
-            callback_function(self.scancount)
             if self.scancount != 0:
                 timer = Timer(interval, asynchron_timer)
                 timer.start()
             else:
                 pass
 
-
-        if callback_function is None:
+        if asynchron is False:
             from time import sleep
             while True:
                 self.scancount = self.get_scancount()
