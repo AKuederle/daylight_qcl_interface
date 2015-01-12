@@ -16,10 +16,10 @@ class QCL(object):
 
     from collections import namedtuple
     _control = namedtuple("control", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step"])
-    _state = namedtuple("state", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step", "whours", "scancoun"])
+    _state = namedtuple("state", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step", "whours", "scancount"])
     _query = namedtuple("query", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step", "whours", "scancount", "all"])
 
-    def __init__(self, port=0, log=False):
+    def __init__(self, port=0, log=False, getall=True):
         import serial
         super(QCL, self).__init__()
         self.ser = serial.Serial(port)      # opens the COM1 port to communicate with the laser
@@ -32,7 +32,8 @@ class QCL(object):
         self.Get = self._query(wn=self.get_wn, freq=self.get_freq, pw=self.get_pw, startwn=self.get_startwn, stopwn=self.get_stopwn, rate=self.get_rate, cycles=self.get_cycles,
                                mode=self.get_mode, pause=self.get_pause, step=self.get_step, whours=self.get_whours, scancount=self.get_scancount, all=self.get_all)
         self.Stat = self._state(wn=None, freq=None, pw=None, startwn=None, stopwn=None, rate=None, cycles=None, mode=None, pause=None, step=None, whours=None, scancount=None)
-        self.get_all()
+        if getall is True:
+            self.get_all()
 
     def _log_write(self, string):
         if self.log is True:
@@ -194,7 +195,7 @@ class QCL(object):
         self.ser.write(command)
         answer = self.ser.read(3)
         self._log_write(answer)
-        rlvalue = float(answer[:-2])
+        rlvalue = int(answer[:-2])
         self.Stat = self.Stat._replace(mode=rlvalue)
         return rlvalue
 
@@ -237,9 +238,9 @@ class QCL(object):
             command = ":scan:step?\n"
             self._log_write(command)
             self.ser.write(command)
-            answer = self.ser.read(9)
+            answer = self.ser.read(10)
             self._log_write(answer)
-            rlvalue = float(answer[:-5])
+            rlvalue = float(answer[:-6])
             self.Stat = self.Stat._replace(step=rlvalue)
             return rlvalue
 
