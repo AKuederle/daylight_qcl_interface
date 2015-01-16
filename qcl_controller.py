@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 
 class RangeError(Exception):
 
@@ -15,9 +13,9 @@ class QCL(object):
     """
 
     from collections import namedtuple
-    _control = namedtuple("control", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step"])
-    _state = namedtuple("state", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step", "whours", "scancount"])
-    _query = namedtuple("query", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step", "whours", "scancount", "all"])
+    _control = namedtuple("control", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step", "interval"])
+    _state = namedtuple("state", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step", "whours", "scancount", "intervall"])
+    _query = namedtuple("query", ["wn", "freq", "pw", "startwn", "stopwn", "rate", "cycles", "mode", "pause", "step", "whours", "scancount", "awn", "all"])
 
     def __init__(self, port=0, log=False, getall=True):
         import serial
@@ -27,11 +25,11 @@ class QCL(object):
         self.ser.timeout = 1             # set timeout for port to 1 second
         self.log = log
         self.log_file = []
-        self._Range = self._control(wn=(980.04, 1244.99), freq=(1.0, 100.0), pw=(0.04, 0.5), startwn=(980.04, 1244.99), stopwn=(980.04, 1244.99), rate=(1.0, 6.0), cycles=(1.0, 10000.0), mode=(1.0, 4.0), pause=(0.0, 10.0), step=(0.01, 264.95))
-        self.Set = self._control(wn=self.set_wn, freq=self.set_freq, pw=self.set_pw, startwn=self.set_startwn, stopwn=self.set_stopwn, rate=self.set_rate, cycles=self.set_cycles, mode=self.set_mode, pause=self.set_pause, step=self.set_step)
+        self._Range = self._control(wn=(980.04, 1244.99), freq=(1.0, 100.0), pw=(0.04, 0.5), startwn=(980.04, 1244.99), stopwn=(980.04, 1244.99), rate=(1.0, 6.0), cycles=(1.0, 10000.0), mode=(1.0, 4.0), pause=(0.0, 10.0), step=(0.01, 264.95), interval=(0.01, 1000.0))
+        self.Set = self._control(wn=self.set_wn, freq=self.set_freq, pw=self.set_pw, startwn=self.set_startwn, stopwn=self.set_stopwn, rate=self.set_rate, cycles=self.set_cycles, mode=self.set_mode, pause=self.set_pause, step=self.set_step, interval=self.set_interval)
         self.Get = self._query(wn=self.get_wn, freq=self.get_freq, pw=self.get_pw, startwn=self.get_startwn, stopwn=self.get_stopwn, rate=self.get_rate, cycles=self.get_cycles,
-                               mode=self.get_mode, pause=self.get_pause, step=self.get_step, whours=self.get_whours, scancount=self.get_scancount, all=self.get_all)
-        self.Stat = self._state(wn=None, freq=None, pw=None, startwn=None, stopwn=None, rate=None, cycles=None, mode=None, pause=None, step=None, whours=None, scancount=None)
+                               mode=self.get_mode, pause=self.get_pause, step=self.get_step, whours=self.get_whours, scancount=self.get_scancount, awn=self.get_awn, all=self.get_all)
+        self.Stat = self._state(wn=None, freq=None, pw=None, startwn=None, stopwn=None, rate=None, cycles=None, mode=None, pause=None, step=None, whours=None, scancount=None, interval=3)
         if getall is True:
             self.get_all()
 
@@ -189,7 +187,7 @@ class QCL(object):
         return rlvalue
 
     def get_mode(self):
-        """get the current wavenumber."""
+        """get the current scanmode."""
         command = ":scan:mode?\n"
         self._log_write(command)
         self.ser.write(command)
@@ -200,7 +198,13 @@ class QCL(object):
         return rlvalue
 
     def set_mode(self, value):
-        """set wavenumber."""
+        """set scanmode.
+
+        1 = automatic stepscan
+        2 = manual stepscan
+        3 = forward sweep
+        4 = forward_backward sweep
+        """
         if float(value) < self._Range.mode[0] or float(value) > self._Range.mode[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:mode {}\n".format(str(int(value)))
@@ -210,7 +214,7 @@ class QCL(object):
         return rlvalue
 
     def get_pause(self):
-        """get the current wavenumber."""
+        """get the scan pause."""
         command = ":scan:pause?\n"
         self._log_write(command)
         self.ser.write(command)
@@ -221,7 +225,7 @@ class QCL(object):
         return rlvalue
 
     def set_pause(self, value):
-        """set wavenumber."""
+        """set scan pause."""
         if float(value) < self._Range.pause[0] or float(value) > self._Range.pause[1]:
             raise RangeError("{} is out of range!".format(str(value)))
         command = ":scan:pause {}\n".format(str(value))
@@ -231,8 +235,8 @@ class QCL(object):
         return rlvalue
 
     def get_step(self):
-        """get the current wavenumber."""
-        if self.Stat.mode != 1:
+        """get the step size for stepscan mode."""
+        if self.Stat.mode != 1 or self.Stat.mode != 2:
             pass
         else:
             command = ":scan:step?\n"
@@ -245,8 +249,8 @@ class QCL(object):
             return rlvalue
 
     def set_step(self, value):
-        """set stepsize."""
-        if self.Stat.mode != 1:
+        """set step size."""
+        if self.Stat.mode != 1 or self.Stat.mode != 2:
             pass
         else:
             if float(value) < self._Range.step[0] or float(value) > self._Range.step[1]:
@@ -256,6 +260,16 @@ class QCL(object):
             self.ser.write(command)
             rlvalue = self.get_step()
             return rlvalue
+
+    def set_interval(self, value):
+        """set the interval time for a manual step scan.
+
+        This function is only used to have the same command structure for normal scans, as well as the semi manual step scan
+        """
+        if float(value) < self._Range.interval[0] or float(value) > self._Range.interval[1]:
+            raise RangeError("{} is out of range!".format(str(value)))
+        self.Stat = self.Stat._replace(interval=value)
+        return value
 
     def get_whours(self):
         """get the working hours."""
@@ -279,6 +293,16 @@ class QCL(object):
         self.Stat = self.Stat._replace(scancount=rlvalue)
         return rlvalue
 
+    def get_awn(self):
+        """get the wavnumber the qcl contoller is currently outputting (not the one which is set)."""
+        command = ":laser:pos?"
+        self._log_write(command)
+        self.ser.write(command)
+        answer = self.ser.read(13)
+        self._log_write(answer)
+        rlvalue = float(answer[:-6])
+        return rlvalue
+
     def scan_start(self):
         """send start command."""
         command = ":scan:run 1\n"
@@ -291,6 +315,12 @@ class QCL(object):
         self._log_write(command)
         self.ser.write(command)
 
+    def next(self):
+        """jump to the next wavenumber in manual stepscan."""
+        command = ":scan:step:next\n"
+        self._log_write(command)
+        self.ser.write(command)
+
     def get_all(self):
         """get the full current laser state."""
         for command in self.Get[:-1]:
@@ -300,9 +330,9 @@ class QCL(object):
     def wait_for_finish(self, interval=3.0, asynchron=False):
         """Give information, when current scans are finished.
 
-        The function query the current scancount every few seconds (defined by the intervall parameter). If no callback_function is provided, a synchrone sleeptimer is used.
+        The function query the current scancount every few seconds (defined by the interval parameter). If asynchron is false, a synchrone sleeptimer is used.
         Therefore the script will be blocked until the current scans are finished (indicated by a scancount of 0).
-        If a callback_function is provided, a asynchron timer in a different thread is used.
+        If a asynchron parameter is specified is provided, a asynchron timer in a different thread is used.
         Furthermore the given callback_function is called with the current scancount as primary parameter,
         as a way of retrieving the scancount.
         Latter must only be used for multithreading applications, such like GUIs, while the synchrone timer is a way to delay the execution of a simple script, until scans have finished
@@ -321,6 +351,30 @@ class QCL(object):
                 self.scancount = self.get_scancount()
                 if self.scancount == 0:
                     break
+                sleep(interval)
+
+        else:
+            from threading import Timer
+            asynchron_timer()
+
+    def man_scan(self, asynchron=True):
+        interval = self.Stat.interval
+        self.scan_start()
+
+        def asynchron_timer(interval=interval):
+            if self.Stat.scancount != 0:
+                self.next()
+                timer = Timer(interval, asynchron_timer)
+                timer.start()
+            else:
+                pass
+
+        if asynchron is False:
+            from time import sleep
+            while True:
+                if self.Stat.scancount == 0:
+                    break
+                self.next()
                 sleep(interval)
 
         else:
