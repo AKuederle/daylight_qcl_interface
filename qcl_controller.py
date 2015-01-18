@@ -243,14 +243,12 @@ class QCL(object):
     def get_step(self):
         """get the step size for stepscan mode."""
         if not (self.Stat.mode == 1 or self.Stat.mode == 2):
-            print "no"
             pass
         else:
             command = ":scan:step?\n"
             self._log_write(command)
             self.ser.write(command)
             answer = self.ser.read(11)
-            print answer
             self._log_write(answer)
             rlvalue = float(answer[:-6])
             self.Stat = self.Stat._replace(step=rlvalue)
@@ -258,9 +256,7 @@ class QCL(object):
 
     def set_step(self, value):
         """set step size."""
-        print "hi"
         if not (self.Stat.mode == 1 or self.Stat.mode == 2):
-            print "no"
             pass
         else:
             if float(value) < self._Range.step[0] or float(value) > self._Range.step[1]:
@@ -298,7 +294,6 @@ class QCL(object):
         self._log_write(command)
         self.ser.write(command)
         answer = self.ser.read(6)
-        print [answer]
         self._log_write(answer)
         rlvalue = int(answer[:-2])
         self.Stat = self.Stat._replace(scancount=rlvalue)
@@ -310,7 +305,6 @@ class QCL(object):
         self._log_write(command)
         self.ser.write(command)
         answer = self.ser.read(13)
-        print answer
         self._log_write(answer)
         rlvalue = float(answer[:-6])
         self.Stat = self.Stat._replace(awn=rlvalue)
@@ -372,20 +366,16 @@ class QCL(object):
 
     def man_scan(self, asynchron=True):
         interval = self.Stat.interval
-        print interval
         self.scan_start()
-        
+
         def asynchron_timer(interval=interval):
             self.get_scancount()
             self.get_awn()
-            print self.Stat.scancount
             if self.Stat.scancount != 0:
-                print "next"
                 self.step_next()
                 timer = Timer(interval, asynchron_timer)
                 timer.start()
             else:
-                print "finsihed"
                 pass
 
         if asynchron is False:
