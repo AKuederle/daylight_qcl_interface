@@ -1,6 +1,118 @@
+"""qcl_controller.py provides a easy to use command line interface to control the QCL.
+
+qcl_controller.py
+=================
+
+Provides:
+1. A simple wrapper class for a a selection of serial port commands to control a daylight solution tunable QCL.
+2. More advanced functions to provide some higher level functionality
+
+The documentation of the QCL serial interface can be found in its manual, available at the manuals folder
+of the PASFFM Mendeley Group.
+"""
+__author__ = "Arne Küderle"
+__copyright__ = "Copyright 2015, Arne Küderle"
+__version__ = "1.0"
+__maintainer__ = "Arne Küderle"
+__email__ = "a.kuederle@gmail.com"
+
+
 class QCL(object):
 
-    """Simple python wrapper for a selection of serial port commands to control a daylight solution tunable QCL.
+    """Simple python wrapper class for a selection of serial port commands to control a daylight solution tunable QCL.
+
+    The class contains multiple functions to get and set the most common laser parameters. This is either done by calling the
+    the functions itself (name-schema: get_*parameter* or set_*parameter*) or by using the provided namedtuples Set or Get (note the capitalisation), which are
+    container for these functions.
+
+    Usage example
+    =============
+
+        >>> import qcl_controller # makes the QCL() class available in the current python session or script (make sure qcl_controller.py is in the working directory or the path)
+        >>> qcl = QCL() # establish the connection to the QCL
+
+        # Set and get using the direct function calls
+        >>> print qcl.get_wn() # gets the current wavenumber and prints it out
+        >>> qcl.set_wn(1080) # sets the wavenumber to 1080 cm-1
+
+        # Set and get using the namedtuple container
+        >>> print qcl.Get.wn() # gets the current wavenumber and prints it out
+        >>> qcl.Set.wn(1080) # sets the wavenumber to 1080 cm-1
+
+
+    Available functions
+    ==========================
+    The following list contains all parameter which can be used in combination with the set and get functions. For more detailed description
+    of each parameter check the respective docstrings of the related functions or the laser manual.
+
+    Name      : Description                                           # available modes
+    ===================================================================================
+    wn        : wavenumber                                            # get/set
+    freq      : pulse repetition frequency                            # get/set
+    pw        : pulsewidth                                            # get/set
+    startwn   : starting wavenumber for scans                         # get/set
+    stopwn    : final wavenumber for scans                            # get/set
+    rate      : the scanrate (how fast the laser scans)               # get/set
+    cycles    : number of scan cycles                                 # get/set
+    mode      : scanmode(*)                                           # get/set
+    pause     : pause between wavenumbers or scans (**)               # get/set
+    step      : number of wavenumbers per step in stepscanmode        # get/set
+    interval  : imaginary parameter for the simulated man_scan()(***) # set
+    whours    : working hours of the laser controller                 # get
+    scancount : number of finished cycles during a scan               # get
+    awn       : real current wavenumber                               # get
+
+    *   : to see the available options for this parameter, see the docstring of the set_mode() function
+    **  : the effect of these option depends on the selected scanmode. See the set_pause function docstring for more details
+    *** : This is no "real" parameter of the laser and is only implemented for a consistent using experience. See the docstring of the man_scan() function for more details
+
+    Further functionality, which can not be described by setting or getting a parameter can be accessed by using the following functions.
+
+    Name       : Description
+    ========================
+    scan_start : start scans
+    scan_stop  : abort scans
+    scan_next  : jumps to next wavenumber (only available in manual scanmode)
+    close      : closes the communication port to the laser (should be used at the end of each session)
+
+    Beside simple wrapper functions for laser functionality, the class provides a handful of other useful functions:
+
+    Name            : Description
+    =============================
+    wait_for_finish : periodically reports the status of a running scan
+    man_scan        : a semi-manual implementation of the manual scanmode, which can be used to perform manual scan with a given overall scan time
+    save_log        : saves the collected log data of the session in a file
+
+    Implementation details
+    ======================
+
+    Set-function
+    Before a command is send to the laser, it is checked, if the given value is valid for the respective parameter. This is done using the range
+    information stored in the _Range namedtuple, which contains the upper and the lower limit for each parameter.
+    A Set-function then sends the given parameter to the laser. Right after this command the corresponding Get-function is called
+    to check if the laser has successfully set the parameter to its new value. The new value is returned to the user.
+
+    Get-function
+    The Get functions simple send a query to the laser. The laser than returns the value of the queried parameter. Since the returned answer contains additional characters beside the poor value
+    the answer string is cut respectively and converted in an integer or float format depending of the parameter. Beside returning the value, the value is also writte to the Stat tuple.
+
+    Stat-tuple
+    The Stat namedtuple contains all current known parameter values of the laser. Please note, that this values might not reflected the real laser state, since the values of the tuple are only updated,
+    if the respective value is queried from the laser by one of the provided Get functions. To refresh all parameter values the get_all() function can be used.
+
+    Logging
+    To log and debug the laser communication, all traffic between this controller and the laser can be recorded. To activate logging, the log parameter has to be set to True. This can
+    be done on initialising of the connection or later on in the session.
+
+        # on initialisation
+        >>> qcl = QCL(log=True)
+
+        # later on
+        >>> qcl = QCL()
+        >>> qcl.log = True
+
+    If logging is enabled, all strings, send to or received from the laser, are stored (with respective formatting for incoming and outgoing communication) as a new element of the log_file list variable.
+    To save all logs of session to a file the save_log() function can be used. Please note, that this will clear the log_file variable after saving.
     """
 
     from collections import namedtuple
@@ -314,6 +426,12 @@ class QCL(object):
         self.Stat = self.Stat._replace(awn=rlvalue)
         return rlvalue
 
+    def get_all(self):
+        """get the full current laser state."""
+        for command in self.Get[:-1]:
+            command()
+        return self.Stat
+
     def scan_start(self):
         """send start command."""
         command = ":scan:run 1\n"
@@ -332,21 +450,25 @@ class QCL(object):
         self._log_write(command, mode="write")
         self.ser.write(command)
 
-    def get_all(self):
-        """get the full current laser state."""
-        for command in self.Get[:-1]:
-            command()
-        return self.Stat
+    def close(self):
+        """close the port."""
+        self.ser.close()
 
     def wait_for_finish(self, interval=3.0, asynchron=False):
         """Give information, when current scans are finished.
 
-        The function query the current scancount every few seconds (defined by the interval parameter). If asynchron is false, a synchrone sleeptimer is used.
+        The function queries the current scancount every few seconds (defined by the interval parameter). By calling the get_scancount function, the Stat value of this paramater is also refreshed.
+        Based on the value of the asynchron parameter of this function, different type of timers are used. If asynchron is false, a synchrone sleeptimer is used.
         Therefore the script will be blocked until the current scans are finished (indicated by a scancount of 0).
-        If a asynchron parameter is specified is provided, a asynchron timer in a different thread is used.
-        Furthermore the given callback_function is called with the current scancount as primary parameter,
-        as a way of retrieving the scancount.
+        If a asynchron parameter is specified, a asynchron timer in a different thread is used. Therefore the application is not blocked.
         Latter must only be used for multithreading applications, such like GUIs, while the synchrone timer is a way to delay the execution of a simple script, until scans have finished
+
+            # simple script example
+            >>> qcl.scan_start() # starting scans
+            >>> qcl.wait_for_finish() # blocking the session/script until the scans are finished
+            >>> # do stuff after scans
+
+        WARINING: It is advised not to choose an interval value shorter than 2 seconds!!!!
         """
         def asynchron_timer(interval=interval):
             self.get_scancount()
@@ -369,6 +491,15 @@ class QCL(object):
             asynchron_timer()
 
     def man_scan(self, asynchron=True):
+        """Run a semi-automatic stepscan.
+
+        The function is used to run a stepscan in a defined time interval. Therfor the manual stepscan mode of the laser is used
+        and the function calls the next command every few seconds (defined by the interval Stat). Similar to the wait_for_finish
+        function a synchronous and a asynchronous mode are available.
+        Before the function can be used, the laser must have been set to manual scanmode (mode 2) already. Please note, that due
+        to a delay in the command processing on the laser side, the actual scan takes a view seconds longer. (For example: scan from 990-1240,
+        stepsize: 25 and interval: 5s takes about 62 s instead of 55 seconds).
+        """
         interval = self.Stat.interval
         self.scan_start()
 
@@ -396,7 +527,3 @@ class QCL(object):
             from threading import Timer
             timer = Timer(interval, asynchron_timer)
             timer.start()
-
-    def close(self):
-        """close the port."""
-        self.ser.close()
