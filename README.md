@@ -3,6 +3,7 @@
 Daylight_qcl_interface is a python based wrapper for several serial interface commands to control a Daylight Solution Tunable laser controller.
 
 It Provides:
+
 1. A simple wrapper class for a a selection of serial port commands to control a daylight solution tunable QCL.
 2. More advanced functions to provide some higher level functionality
 
