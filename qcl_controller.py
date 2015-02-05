@@ -7,8 +7,7 @@ Provides:
 1. A simple wrapper class for a a selection of serial port commands to control a daylight solution tunable QCL.
 2. More advanced functions to provide some higher level functionality
 
-The documentation of the QCL serial interface can be found in its manual, available at the manuals folder
-of the PASFFM Mendeley Group.
+The documentation of the QCL serial interface can be found in its manual, available with the procduct or on the official website.
 """
 __author__ = "Arne Küderle"
 __copyright__ = "Copyright 2015, Arne Küderle"
