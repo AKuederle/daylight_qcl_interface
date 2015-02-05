@@ -7,7 +7,7 @@ It Provides:
 1. A simple wrapper class for a a selection of serial port commands to control a daylight solution tunable QCL.
 2. More advanced functions to provide some higher level functionality
 
-The documentation of the Controllers serial interface can be found in its manual (Available with the product).
+The documentation of the QCL serial interface can be found in its manual (Available with the product).
 
 ### Usage
 The qcl_controller.py includes a QCL class. It can be used in an interactive Python shell or in a arbitrary python script by importing the module and creating an instance of the class.
@@ -27,7 +27,7 @@ qcl.set_wn(1080) # sets the wavenumber to 1080 cm-1
 print qcl.Get.wn() # gets the current wavenumber and prints it out
 qcl.Set.wn(1080) # sets the wavenumber to 1080 cm-1
 ```
-"""
+
 
 ### License
 daylight_qcl_interface is published under the MIT license.
