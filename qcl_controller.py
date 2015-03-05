@@ -479,6 +479,7 @@ class QCL(object):
 
         if asynchron is False:
             from time import sleep
+            sleep(3)  # prevent issues, when the function is called directly after the scan-start function
             while True:
                 self.get_scancount()
                 if self.Stat.scancount == 0:
@@ -487,7 +488,8 @@ class QCL(object):
 
         else:
             from threading import Timer
-            asynchron_timer()
+            timer = Timer(3.0, asynchron_timer)  # prevent issues, when the function is called directly after the scan-start function
+            timer.start()
 
     def man_scan(self, asynchron=True):
         """Run a semi-automatic stepscan.
