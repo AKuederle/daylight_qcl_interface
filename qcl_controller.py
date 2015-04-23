@@ -1,3 +1,5 @@
+# -*- coding: UTF8 -*-
+
 """qcl_controller.py provides a easy to use command line interface to control the QCL.
 
 qcl_controller.py
